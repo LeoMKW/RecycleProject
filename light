@@ -1,0 +1,47 @@
+#include <Stepper.h>
+
+const int stepsPerRevolution = 2048;
+Stepper myStepper(stepsPerRevolution, 11, 9, 10, 8);
+const int lightSensorPin = A0;
+
+const int trigPin = 6;
+const int echoPin = 7;
+
+void setup() {
+  myStepper.setSpeed(10);
+  Serial.begin(9600);
+  pinMode(echoPin, INPUT);
+  pinMode(trigPin, OUTPUT);
+}
+
+void loop() {
+  long duration, distance;
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  duration = pulseIn(echoPin, HIGH);
+  distance = ((float)(340 * duration) / 1000) / 2;
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" mm");
+
+  if (distance < 100) {
+    delay(3000);
+    int lightValue = analogRead(lightSensorPin); 
+    Serial.print("Light Value: ");
+    Serial.println(lightValue);
+    if (lightValue > 200) {
+      myStepper.step(-518);
+      delay(2000);
+      myStepper.step(505);
+      Serial.println("Low Light Detected: Counterclockwise");
+    } else {
+      myStepper.step(518);
+      delay(2000);
+      myStepper.step(-510);
+      Serial.println("Enough Light Detected: Clockwise");
+    }
+  }
+
+  delay(1000);
+}
